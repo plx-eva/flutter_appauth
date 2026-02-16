@@ -12,7 +12,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_appauth_platform_interface: ^12.0.0
+  flutter_appauth_platform_interface:
+    git:
+      url: https://github.com/plx-eva/flutter_appauth.git
+      ref: flutter_appauth_platform_interface-v11.1.0
+      path: flutter_appauth_platform_interface
 
 flutter:
   plugin:
