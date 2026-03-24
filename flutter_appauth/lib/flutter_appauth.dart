@@ -8,6 +8,7 @@ export 'package:flutter_appauth_platform_interface/flutter_appauth_platform_inte
         EndSessionRequest,
         EndSessionResponse,
         ExternalUserAgent,
+        FlutterAppAuthErrorCode,
         FlutterAppAuthOAuthError,
         FlutterAppAuthPlatformErrorDetails,
         FlutterAppAuthUserCancelledException,

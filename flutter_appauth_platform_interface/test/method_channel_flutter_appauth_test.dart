@@ -170,6 +170,70 @@ void main() {
     });
   });
 
+  group('errorCode', () {
+    test('Android network error maps to network_error', () {
+      final details = FlutterAppAuthPlatformErrorDetails(
+        type: '0',
+        code: '3',
+      );
+      final exception = FlutterAppAuthPlatformException(
+        code: 'token_failed',
+        platformErrorDetails: details,
+      );
+      expect(exception.errorCode, FlutterAppAuthErrorCode.networkError);
+    });
+
+    test('iOS network error maps to network_error', () {
+      final details = FlutterAppAuthPlatformErrorDetails(
+        type: 'org.openid.appauth.general',
+        code: '-5',
+      );
+      final exception = FlutterAppAuthPlatformException(
+        code: 'token_failed',
+        platformErrorDetails: details,
+      );
+      expect(exception.errorCode, FlutterAppAuthErrorCode.networkError);
+    });
+
+    test('OAuth error string is returned directly', () {
+      final details = FlutterAppAuthPlatformErrorDetails(
+        type: '2',
+        code: '2002',
+        error: 'invalid_grant',
+      );
+      final exception = FlutterAppAuthPlatformException(
+        code: 'token_failed',
+        platformErrorDetails: details,
+      );
+      expect(exception.errorCode, FlutterAppAuthErrorCode.oauthInvalidGrant);
+    });
+
+    test('FlutterAppAuthUserCancelledException errorCode is user_cancelled',
+        () {
+      final details = FlutterAppAuthPlatformErrorDetails(
+        type: '0',
+        code: '1',
+      );
+      final exception = FlutterAppAuthUserCancelledException(
+        code: 'authorize_failed',
+        platformErrorDetails: details,
+      );
+      expect(exception.errorCode, FlutterAppAuthErrorCode.userCancelled);
+    });
+
+    test('unknown mapping falls back to operation code', () {
+      final details = FlutterAppAuthPlatformErrorDetails(
+        type: '99',
+        code: '999',
+      );
+      final exception = FlutterAppAuthPlatformException(
+        code: 'token_failed',
+        platformErrorDetails: details,
+      );
+      expect(exception.errorCode, 'token_failed');
+    });
+  });
+
   test('endSession', () async {
     await flutterAppAuth.endSession(EndSessionRequest(
         idTokenHint: 'someIdToken',
