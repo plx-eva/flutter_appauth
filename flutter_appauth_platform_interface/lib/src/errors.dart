@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import 'error_codes.dart';
+
 /// The details of an error thrown from the underlying
 /// platform's AppAuth SDK
 class FlutterAppAuthPlatformErrorDetails {
@@ -27,6 +29,11 @@ class FlutterAppAuthPlatformErrorDetails {
   ///
   /// On iOS/macOS: depending on the error type, it will be values from [here](https://github.com/openid/AppAuth-iOS/blob/c89ed571ae140f8eb1142735e6e23d7bb8c34cb2/Sources/AppAuthCore/OIDError.h).
   /// On Android: one of the codes defined [here](https://github.com/openid/AppAuth-Android/blob/c6137b7db306d9c097c0d5763f3fb944cd0122d2/library/java/net/openid/appauth/AuthorizationException.java#L158).
+  ///
+  /// This is the low-level native AppAuth SDK code and is distinct from the
+  /// unified [FlutterAppAuthErrorCode] constants. Use
+  /// [FlutterAppAuthPlatformException.errorCode] for platform-agnostic error
+  /// handling.
   ///
   /// It's recommended to not use this unless needed. In most cases, errors
   /// can be handled using the [error] property.
@@ -104,12 +111,17 @@ class FlutterAppAuthUserCancelledException extends PlatformException {
     dynamic legacyDetails,
     super.stacktrace,
     required this.platformErrorDetails,
-  }) : super(
-          details: legacyDetails,
-        );
+  }) : super(details: legacyDetails);
 
   /// Details of the error from the underlying platform's AppAuth SDK.
   final FlutterAppAuthPlatformErrorDetails platformErrorDetails;
+
+  /// Always returns [FlutterAppAuthErrorCode.userCancelled].
+  ///
+  /// Catching [FlutterAppAuthUserCancelledException] itself is the primary
+  /// way to handle user cancellation; this property is provided for parity
+  /// with [FlutterAppAuthPlatformException.errorCode].
+  String get errorCode => FlutterAppAuthErrorCode.userCancelled;
 
   @override
   String toString() {
@@ -127,12 +139,34 @@ class FlutterAppAuthPlatformException extends PlatformException {
     dynamic legacyDetails,
     super.stacktrace,
     required this.platformErrorDetails,
-  }) : super(
-          details: legacyDetails,
-        );
+  }) : super(details: legacyDetails);
 
   /// Details of the error from the underlying platform's AppAuth SDK.
   final FlutterAppAuthPlatformErrorDetails platformErrorDetails;
+
+  /// A unified, platform-agnostic error code.
+  ///
+  /// Use [FlutterAppAuthErrorCode] constants to match against this value:
+  /// ```dart
+  /// } on FlutterAppAuthPlatformException catch (e) {
+  ///   switch (e.errorCode) {
+  ///     case FlutterAppAuthErrorCode.networkError:
+  ///       // handle network error
+  ///     case FlutterAppAuthErrorCode.tokenFailed:
+  ///       // token operation failed for an unmapped reason
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// Resolution order:
+  /// 1. If the server returned an OAuth error string (e.g. `invalid_grant`),
+  ///    that string is returned directly — match it against
+  ///    [FlutterAppAuthErrorCode.oauthInvalidGrant] etc.
+  /// 2. If the native AppAuth SDK code maps to a known cause, the cause
+  ///    code is returned (e.g. [FlutterAppAuthErrorCode.networkError]).
+  /// 3. Falls back to the operation code from [PlatformException.code]
+  ///    (e.g. [FlutterAppAuthErrorCode.tokenFailed]).
+  String get errorCode => _resolveErrorCode(platformErrorDetails, code);
 }
 
 /// Represents OAuth error codes that can be returned by the authorization
@@ -148,3 +182,62 @@ class FlutterAppAuthOAuthError {
   static const String unsupportedGrantType = 'unsupported_grant_type';
   static const String invalidScope = 'invalid_scope';
 }
+
+String _resolveErrorCode(FlutterAppAuthPlatformErrorDetails details, String fallback) {
+  // 1. OAuth error string from server matches constants directly
+  final oauthError = details.error;
+  if (oauthError != null) return oauthError;
+
+  final nativeCode = int.tryParse(details.code ?? '');
+  if (nativeCode == null) return fallback;
+
+  final type = details.type;
+  if (type == null) return fallback;
+
+  // Android: type is a small integer string ("0" = general errors)
+  final androidType = int.tryParse(type);
+  if (androidType != null) {
+    if (androidType == 0) {
+      return _androidGeneralCode(nativeCode) ?? fallback;
+    }
+    return fallback;
+  }
+
+  // iOS/macOS: type is the NSError domain string
+  if (type == 'org.openid.appauth.general') {
+    return _iosGeneralCode(nativeCode) ?? fallback;
+  }
+  return fallback;
+}
+
+String? _androidGeneralCode(int code) => switch (code) {
+  0 => FlutterAppAuthErrorCode.invalidDiscoveryDocument,
+  1 => FlutterAppAuthErrorCode.userCancelled,
+  2 => FlutterAppAuthErrorCode.programCancelled,
+  3 => FlutterAppAuthErrorCode.networkError,
+  4 => FlutterAppAuthErrorCode.appAuthServerError,
+  5 => FlutterAppAuthErrorCode.jsonDeserializationError,
+  6 => FlutterAppAuthErrorCode.tokenResponseConstructionError,
+  7 => FlutterAppAuthErrorCode.invalidRegistrationResponse,
+  8 => FlutterAppAuthErrorCode.idTokenParsingError,
+  9 => FlutterAppAuthErrorCode.idTokenValidationError,
+  _ => null,
+};
+
+String? _iosGeneralCode(int code) => switch (code) {
+  -2 => FlutterAppAuthErrorCode.invalidDiscoveryDocument,
+  -3 => FlutterAppAuthErrorCode.userCancelled,
+  -4 => FlutterAppAuthErrorCode.programCancelled,
+  -5 => FlutterAppAuthErrorCode.networkError,
+  -6 => FlutterAppAuthErrorCode.appAuthServerError,
+  -7 => FlutterAppAuthErrorCode.jsonDeserializationError,
+  -8 => FlutterAppAuthErrorCode.tokenResponseConstructionError,
+  -9 => FlutterAppAuthErrorCode.browserOpenError,
+  -10 => FlutterAppAuthErrorCode.browserOpenError,
+  -11 => FlutterAppAuthErrorCode.tokenRefreshError,
+  -12 => FlutterAppAuthErrorCode.invalidRegistrationResponse,
+  -13 => FlutterAppAuthErrorCode.jsonSerializationError,
+  -14 => FlutterAppAuthErrorCode.idTokenParsingError,
+  -15 => FlutterAppAuthErrorCode.idTokenValidationError,
+  _ => null,
+};
