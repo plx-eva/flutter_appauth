@@ -11,7 +11,8 @@
 class FlutterAppAuthErrorCode {
   // ── Operation codes ───────────────────────────────────────────────────────
   static const String discoveryFailed = 'discovery_failed';
-  static const String authorizeAndExchangeCodeFailed = 'authorize_and_exchange_code_failed';
+  static const String authorizeAndExchangeCodeFailed =
+      'authorize_and_exchange_code_failed';
   static const String authorizeFailed = 'authorize_failed';
   static const String tokenFailed = 'token_failed';
   static const String endSessionFailed = 'end_session_failed';
@@ -32,14 +33,16 @@ class FlutterAppAuthErrorCode {
   static const String networkError = 'network_error';
   static const String appAuthServerError = 'appauth_server_error';
   static const String jsonDeserializationError = 'json_deserialization_error';
-  static const String tokenResponseConstructionError = 'token_response_construction_error';
+  static const String tokenResponseConstructionError =
+      'token_response_construction_error';
 
   /// macOS only (NSWorkspace.openURL returned NO).
   static const String browserOpenError = 'browser_open_error';
 
   /// iOS only.
   static const String tokenRefreshError = 'token_refresh_error';
-  static const String invalidRegistrationResponse = 'invalid_registration_response';
+  static const String invalidRegistrationResponse =
+      'invalid_registration_response';
 
   /// iOS only.
   static const String jsonSerializationError = 'json_serialization_error';
@@ -50,7 +53,8 @@ class FlutterAppAuthErrorCode {
   static const String oauthInvalidRequest = 'invalid_request';
   static const String oauthUnauthorizedClient = 'unauthorized_client';
   static const String oauthAccessDenied = 'access_denied';
-  static const String oauthUnsupportedResponseType = 'unsupported_response_type';
+  static const String oauthUnsupportedResponseType =
+      'unsupported_response_type';
   static const String oauthInvalidScope = 'invalid_scope';
   static const String oauthServerError = 'server_error';
   static const String oauthTemporarilyUnavailable = 'temporarily_unavailable';

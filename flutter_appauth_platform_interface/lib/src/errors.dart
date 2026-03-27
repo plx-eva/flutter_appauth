@@ -183,7 +183,10 @@ class FlutterAppAuthOAuthError {
   static const String invalidScope = 'invalid_scope';
 }
 
-String _resolveErrorCode(FlutterAppAuthPlatformErrorDetails details, String fallback) {
+String _resolveErrorCode(
+  FlutterAppAuthPlatformErrorDetails details,
+  String fallback,
+) {
   // 1. OAuth error string from server matches constants directly
   final oauthError = details.error;
   if (oauthError != null) return oauthError;
