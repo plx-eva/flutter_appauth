@@ -173,6 +173,18 @@
     return [[OIDExternalUserAgentIOSSafariViewController alloc]
         initWithPresentingViewController:presentingViewController];
   }
+  if ([externalUserAgent integerValue] == CustomBrowserSafari) {
+    return [OIDExternalUserAgentIOSCustomBrowser CustomBrowserSafari];
+  }
+  if ([externalUserAgent integerValue] == CustomBrowserChrome) {
+    return [OIDExternalUserAgentIOSCustomBrowser CustomBrowserChrome];
+  }
+  if ([externalUserAgent integerValue] == CustomBrowserFirefox) {
+    return [OIDExternalUserAgentIOSCustomBrowser CustomBrowserFirefox];
+  }
+  if ([externalUserAgent integerValue] == CustomBrowserOpera) {
+    return [OIDExternalUserAgentIOSCustomBrowser CustomBrowserOpera];
+  }
   return [[OIDExternalUserAgentIOS alloc]
       initWithPresentingViewController:presentingViewController];
 }

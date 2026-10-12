@@ -137,11 +137,11 @@ AppAuthAuthorization *authorization;
 
   NSAppleEventManager *appleEventManager =
       [NSAppleEventManager sharedAppleEventManager];
-  [appleEventManager setEventHandler:instance
-                         andSelector:@selector(handleGetURLEvent:
-                                                  withReplyEvent:)
-                       forEventClass:kInternetEventClass
-                          andEventID:kAEGetURL];
+  [appleEventManager
+      setEventHandler:instance
+          andSelector:@selector(handleGetURLEvent:withReplyEvent:)
+        forEventClass:kInternetEventClass
+           andEventID:kAEGetURL];
 #else
   authorization = [[AppAuthIOSAuthorization alloc] init];
 
@@ -484,7 +484,8 @@ AppAuthAuthorization *authorization;
             openURL:(NSURL *)url
             options:
                 (NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
-  if ([_currentAuthorizationFlow resumeExternalUserAgentFlowWithURL:url]) {
+  if ([_currentAuthorizationFlow resumeExternalUserAgentFlowWithURL:url
+                                                              error:nil]) {
     _currentAuthorizationFlow = nil;
     return YES;
   }
@@ -503,7 +504,8 @@ AppAuthAuthorization *authorization;
     openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts {
   for (UIOpenURLContext *URLContext in URLContexts) {
     if ([_currentAuthorizationFlow
-            resumeExternalUserAgentFlowWithURL:URLContext.URL]) {
+            resumeExternalUserAgentFlowWithURL:URLContext.URL
+                                         error:nil]) {
       _currentAuthorizationFlow = nil;
       return YES;
     }
