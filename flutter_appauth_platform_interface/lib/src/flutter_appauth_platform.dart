@@ -62,4 +62,22 @@ abstract class FlutterAppAuthPlatform extends PlatformInterface {
   Future<EndSessionResponse> endSession(EndSessionRequest request) {
     throw UnimplementedError('endSession() has not been implemented');
   }
+
+  /// Fails the in-flight authorize/end session request (if any), dismissing
+  /// the browser/Custom Tab or `ASWebAuthenticationSession`/
+  /// `SFSafariViewController` it opened.
+  ///
+  /// Useful when a redirect is delivered through a channel that bypasses the
+  /// plugin's normal redirect handling (e.g. a universal/app link received
+  /// directly by the host app), which would otherwise leave the browser open
+  /// indefinitely.
+  ///
+  /// [errorDetails] is exposed through the resulting
+  /// [PlatformException.details] value.
+  Future<void> failCurrentFlow(
+      {String? errorCode,
+      String? errorMessage,
+      Map<String, dynamic>? errorDetails}) {
+    throw UnimplementedError('failCurrentFlow() has not been implemented');
+  }
 }
