@@ -84,6 +84,19 @@ class MethodChannelFlutterAppAuth extends FlutterAppAuthPlatform {
     return EndSessionResponse(result['state']);
   }
 
+  @override
+  Future<void> failCurrentFlow({
+    String? errorCode,
+    String? errorMessage,
+    Map<String, dynamic>? errorDetails,
+  }) async {
+    await invokeMethod('failCurrentFlow', {
+      'errorCode': errorCode,
+      'errorMessage': errorMessage,
+      'errorDetails': errorDetails,
+    });
+  }
+
   Future<Map<dynamic, dynamic>> invokeMethod(
       String method, dynamic arguments) async {
     try {
@@ -93,7 +106,7 @@ class MethodChannelFlutterAppAuth extends FlutterAppAuthPlatform {
       if (e.details == null) {
         rethrow;
       }
-      final Map<String?, String?>? errorDetails = _extractErrorDetails(
+      final Map<String?, dynamic>? errorDetails = _extractErrorDetails(
         e.details,
       );
       if (errorDetails == null) {
@@ -105,8 +118,12 @@ class MethodChannelFlutterAppAuth extends FlutterAppAuthPlatform {
       // usages.
       final dynamic legacyErrorDetails =
           errorDetails['legacy_error_details'] ?? errorDetails;
+      final stringErrorDetails = <String?, String?>{
+        for (final entry in errorDetails.entries)
+          entry.key: entry.value?.toString(),
+      };
       final FlutterAppAuthPlatformErrorDetails parsedDetails =
-          FlutterAppAuthPlatformErrorDetails.fromMap(errorDetails);
+          FlutterAppAuthPlatformErrorDetails.fromMap(stringErrorDetails);
 
       if (errorDetails['user_did_cancel']?.toLowerCase().trim() == 'true') {
         throw FlutterAppAuthUserCancelledException(
@@ -128,9 +145,9 @@ class MethodChannelFlutterAppAuth extends FlutterAppAuthPlatform {
     }
   }
 
-  Map<String?, String?>? _extractErrorDetails(dynamic details) {
+  Map<String?, dynamic>? _extractErrorDetails(dynamic details) {
     try {
-      return details is Map ? details.cast<String?, String?>() : null;
+      return details is Map ? details.cast<String?, dynamic>() : null;
     } catch (_) {
       return null;
     }

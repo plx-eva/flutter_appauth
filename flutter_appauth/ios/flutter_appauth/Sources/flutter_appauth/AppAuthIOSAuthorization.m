@@ -37,6 +37,7 @@
     id<OIDExternalUserAgent> agent =
         [self userAgentWithViewController:presentingViewController
                         externalUserAgent:externalUserAgent];
+    self.currentExternalUserAgent = agent;
     return [OIDAuthState
         authStateByPresentingAuthorizationRequest:request
                                 externalUserAgent:agent
@@ -69,6 +70,7 @@
     id<OIDExternalUserAgent> agent =
         [self userAgentWithViewController:presentingViewController
                         externalUserAgent:externalUserAgent];
+    self.currentExternalUserAgent = agent;
     return [OIDAuthorizationService
         presentAuthorizationRequest:request
                   externalUserAgent:agent
@@ -137,6 +139,7 @@
   id<OIDExternalUserAgent> externalUserAgent =
       [self userAgentWithViewController:presentingViewController
                       externalUserAgent:requestParameters.externalUserAgent];
+  self.currentExternalUserAgent = externalUserAgent;
 
   return [OIDAuthorizationService
       presentEndSessionRequest:endSessionRequest

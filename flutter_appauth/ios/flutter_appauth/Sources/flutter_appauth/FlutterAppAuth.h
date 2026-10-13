@@ -33,6 +33,8 @@ static NSString *const AUTHORIZE_AND_EXCHANGE_CODE_METHOD =
     @"authorizeAndExchangeCode";
 static NSString *const TOKEN_METHOD = @"token";
 static NSString *const END_SESSION_METHOD = @"endSession";
+static NSString *const FAIL_CURRENT_FLOW_METHOD = @"failCurrentFlow";
+static NSString *const FAIL_CURRENT_FLOW_ERROR_CODE = @"failed_current_flow";
 static NSString *const AUTHORIZE_ERROR_CODE = @"authorize_failed";
 static NSString *const AUTHORIZE_AND_EXCHANGE_CODE_ERROR_CODE =
     @"authorize_and_exchange_code_failed";
@@ -70,6 +72,13 @@ typedef NS_ENUM(NSInteger, ExternalUserAgent) {
 
 @interface AppAuthAuthorization : NSObject
 
+/// @brief The external user agent (e.g. ASWebAuthenticationSession,
+/// SFSafariViewController) currently presenting an in-flight authorization or
+/// end session request, if any.
+
+@property(nonatomic, strong, nullable) id<OIDExternalUserAgent>
+    currentExternalUserAgent;
+
 - (id<OIDExternalUserAgentSession>)
     performAuthorization:(OIDServiceConfiguration *)serviceConfiguration
                 clientId:(NSString *)clientId
@@ -86,6 +95,13 @@ typedef NS_ENUM(NSInteger, ExternalUserAgent) {
     performEndSessionRequest:(OIDServiceConfiguration *)serviceConfiguration
            requestParameters:(EndSessionRequestParameters *)requestParameters
                       result:(FlutterResult)result;
+
+/// @brief Fails the given flow's callback with the passed error, dismissing the
+/// currently presented external user agent first (if any). Unlike
+/// [OIDExternalUserAgentSession failExternalUserAgentFlowWithError:], this also
+/// closes any visible SFSafariViewController/ASWebAuthenticationSession.
+- (void)failFlow:(id<OIDExternalUserAgentSession>)flow
+       withError:(NSError *)error;
 
 @end
 

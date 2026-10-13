@@ -164,9 +164,42 @@ AppAuthAuthorization *authorization;
     [self handleTokenMethodCall:[call arguments] result:result];
   } else if ([END_SESSION_METHOD isEqualToString:call.method]) {
     [self handleEndSessionMethodCall:[call arguments] result:result];
+  } else if ([FAIL_CURRENT_FLOW_METHOD isEqualToString:call.method]) {
+    [self handleFailCurrentFlowMethodCall:[call arguments] result:result];
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (void)handleFailCurrentFlowMethodCall:(NSDictionary *)arguments
+                                 result:(FlutterResult)result {
+  NSString *code = [ArgumentProcessor processArgumentValue:arguments
+                                                   withKey:@"errorCode"];
+  NSString *message = [ArgumentProcessor processArgumentValue:arguments
+                                                      withKey:@"errorMessage"];
+  NSDictionary *details =
+      [ArgumentProcessor processArgumentValue:arguments
+                                      withKey:@"errorDetails"];
+
+  NSMutableDictionary *userInfo =
+      [details mutableCopy] ?: [NSMutableDictionary dictionary];
+  userInfo[NSLocalizedDescriptionKey] =
+      message ?: @"Authorization flow was cancelled.";
+
+  NSError *error = [NSError errorWithDomain:code ?: FAIL_CURRENT_FLOW_ERROR_CODE
+                                       code:0
+                                   userInfo:userInfo];
+  [self failCurrentFlow:error];
+  result(@{});
+}
+
+- (void)failCurrentFlow:(NSError *)error {
+  id<OIDExternalUserAgentSession> flow = _currentAuthorizationFlow;
+  _currentAuthorizationFlow = nil;
+  if (!flow) {
+    return;
+  }
+  [authorization failFlow:flow withError:error];
 }
 
 - (void)ensureAdditionalParametersInitialized:

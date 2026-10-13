@@ -103,6 +103,9 @@
                   forKey:@"error_debug_description"];
     }
 
+    NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
+    [details addEntriesFromDictionary:userInfo];
+
     bool userDidCancel =
         [error.domain isEqual:@"org.openid.appauth.general"] &&
         error.code == OIDErrorCodeUserCanceledAuthorizationFlow;
@@ -144,6 +147,21 @@
            requestParameters:(EndSessionRequestParameters *)requestParameters
                       result:(FlutterResult)result {
   return nil;
+}
+
+- (void)failFlow:(id<OIDExternalUserAgentSession>)flow
+       withError:(NSError *)error {
+  id<OIDExternalUserAgent> externalUserAgent = self.currentExternalUserAgent;
+  self.currentExternalUserAgent = nil;
+  if (externalUserAgent) {
+    [externalUserAgent
+        dismissExternalUserAgentAnimated:YES
+                              completion:^{
+                                [flow failExternalUserAgentFlowWithError:error];
+                              }];
+  } else {
+    [flow failExternalUserAgentFlowWithError:error];
+  }
 }
 
 @end

@@ -52,6 +52,7 @@ public class FlutterAppauthPlugin
   private static final String AUTHORIZE_METHOD = "authorize";
   private static final String TOKEN_METHOD = "token";
   private static final String END_SESSION_METHOD = "endSession";
+  private static final String FAIL_CURRENT_FLOW_METHOD = "failCurrentFlow";
 
   private static final String DISCOVERY_ERROR_CODE = "discovery_failed";
   private static final String AUTHORIZE_AND_EXCHANGE_CODE_ERROR_CODE =
@@ -63,6 +64,7 @@ public class FlutterAppauthPlugin
   private static final String NULL_ACTIVITY_ERROR_CODE = "null_activity";
   private static final String INVALID_CLAIMS_ERROR_CODE = "invalid_claims";
   private static final String NO_BROWSER_AVAILABLE_ERROR_CODE = "no_browser_available";
+  private static final String FAIL_CURRENT_FLOW_ERROR_CODE = "fail_current_flow";
 
   private static final String DISCOVERY_ERROR_MESSAGE_FORMAT =
       "Error retrieving discovery document: [error: %s, description: %s]";
@@ -206,9 +208,53 @@ public class FlutterAppauthPlugin
           finishWithError(END_SESSION_ERROR_CODE, ex.getLocalizedMessage(), ex);
         }
         break;
+      case FAIL_CURRENT_FLOW_METHOD:
+        handleFailCurrentFlowMethodCall(arguments, result);
+        break;
       default:
         result.notImplemented();
     }
+  }
+
+  /**
+   * Fails the in-flight authorize/end session operation (if any) with the given error, dismissing
+   * the browser/Custom Tab it opened first. Used for redirects (e.g. universal/app links) that
+   * bypass {@link AppAuthIntentLauncherActivity}'s normal {@code onActivityResult} callback,
+   * which would otherwise leave the browser open.
+   */
+  private void handleFailCurrentFlowMethodCall(Map<String, Object> arguments, Result result) {
+    String code = FAIL_CURRENT_FLOW_ERROR_CODE;
+    String message = "Authorization flow was cancelled.";
+    Map<String, Object> details = new HashMap<>();
+    if (arguments != null) {
+      if (arguments.get("errorCode") != null) {
+        code = (String) arguments.get("errorCode");
+      }
+      if (arguments.get("errorMessage") != null) {
+        message = (String) arguments.get("errorMessage");
+      }
+      if (arguments.get("errorDetails") instanceof Map) {
+        details.putAll((Map<String, Object>) arguments.get("errorDetails"));
+      }
+    }
+
+    dismissCurrentUserAgent();
+
+    if (pendingOperation != null) {
+      Result pendingResult = pendingOperation.result;
+      pendingOperation = null;
+      pendingResult.error(code, message, details);
+    }
+    result.success(new HashMap<String, Object>());
+  }
+
+  /**
+   * Closes the currently visible browser/Custom Tab, if any, by finishing its launcher activity.
+   * No-op if it was already dismissed, e.g. by {@code singleTask}'s clear-top behavior when
+   * handling the redirect that triggered this call.
+   */
+  private void dismissCurrentUserAgent() {
+    AppAuthIntentLauncherActivity.dismiss();
   }
 
   @SuppressWarnings("unchecked")
