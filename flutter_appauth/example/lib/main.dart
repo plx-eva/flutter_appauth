@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:http/http.dart' as http;
@@ -29,35 +29,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String? _idToken;
   String? _error;
 
-  final TextEditingController _authorizationCodeTextController =
-      TextEditingController();
-  final TextEditingController _accessTokenTextController =
-      TextEditingController();
-  final TextEditingController _accessTokenExpirationTextController =
-      TextEditingController();
+  final TextEditingController _authorizationCodeTextController = TextEditingController();
+  final TextEditingController _accessTokenTextController = TextEditingController();
+  final TextEditingController _accessTokenExpirationTextController = TextEditingController();
 
   final TextEditingController _idTokenTextController = TextEditingController();
-  final TextEditingController _refreshTokenTextController =
-      TextEditingController();
+  final TextEditingController _refreshTokenTextController = TextEditingController();
   String? _userInfo;
 
   // For a list of client IDs, go to https://demo.duendesoftware.com
   final String _clientId = 'interactive.public';
   final String _redirectUrl = 'com.duendesoftware.demo:/oauthredirect';
   final String _issuer = 'https://demo.duendesoftware.com';
-  final String _discoveryUrl =
-      'https://demo.duendesoftware.com/.well-known/openid-configuration';
+  final String _discoveryUrl = 'https://demo.duendesoftware.com/.well-known/openid-configuration';
   final String _postLogoutRedirectUrl = 'com.duendesoftware.demo:/';
-  final List<String> _scopes = <String>[
-    'openid',
-    'profile',
-    'email',
-    'offline_access',
-    'api'
-  ];
+  final List<String> _scopes = <String>['openid', 'profile', 'email', 'offline_access', 'api'];
 
-  final AuthorizationServiceConfiguration _serviceConfiguration =
-      const AuthorizationServiceConfiguration(
+  final AuthorizationServiceConfiguration _serviceConfiguration = const AuthorizationServiceConfiguration(
     authorizationEndpoint: 'https://demo.duendesoftware.com/connect/authorize',
     tokenEndpoint: 'https://demo.duendesoftware.com/connect/token',
     endSessionEndpoint: 'https://demo.duendesoftware.com/connect/endsession',
@@ -109,8 +97,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
-                  child: const Text(
-                      'Sign in with no code exchange and generated nonce'),
+                  child: const Text('Sign in with no code exchange and generated nonce'),
                   onPressed: () => _signInWithNoCodeExchangeAndGeneratedNonce(),
                 ),
                 const SizedBox(height: 8),
@@ -133,8 +120,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         textAlign: TextAlign.center,
                       ),
                       onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent: ExternalUserAgent
-                              .ephemeralAsWebAuthenticationSession),
+                          externalUserAgent: ExternalUserAgent.ephemeralAsWebAuthenticationSession),
                     ),
                   ),
                 if (Platform.isIOS) ...[
@@ -146,9 +132,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         'SFSafariViewController',
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent:
-                              ExternalUserAgent.sfSafariViewController),
+                      onPressed: () =>
+                          _signInWithAutoCodeExchange(externalUserAgent: ExternalUserAgent.sfSafariViewController),
                     ),
                   ),
                   Padding(
@@ -158,9 +143,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         'Auto code exchange using system browser (iOS only)',
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent:
-                              ExternalUserAgent.customBrowserSafari),
+                      onPressed: () =>
+                          _signInWithAutoCodeExchange(externalUserAgent: ExternalUserAgent.customBrowserSafari),
                     ),
                   ),
                   Padding(
@@ -170,9 +154,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         'Auto code exchange using Chrome (iOS only)',
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent:
-                              ExternalUserAgent.customBrowserChrome),
+                      onPressed: () =>
+                          _signInWithAutoCodeExchange(externalUserAgent: ExternalUserAgent.customBrowserChrome),
                     ),
                   ),
                   Padding(
@@ -182,9 +165,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         'Auto code exchange using Firefox (iOS only)',
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent:
-                              ExternalUserAgent.customBrowserFirefox),
+                      onPressed: () =>
+                          _signInWithAutoCodeExchange(externalUserAgent: ExternalUserAgent.customBrowserFirefox),
                     ),
                   ),
                   Padding(
@@ -194,9 +176,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         'Auto code exchange using Opera (iOS only)',
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => _signInWithAutoCodeExchange(
-                          externalUserAgent:
-                              ExternalUserAgent.customBrowserOpera),
+                      onPressed: () =>
+                          _signInWithAutoCodeExchange(externalUserAgent: ExternalUserAgent.customBrowserOpera),
                     ),
                   ),
                 ],
@@ -220,12 +201,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         onPressed: _idToken != null
                             ? () async {
                                 await _endSession(
-                                    externalUserAgent: ExternalUserAgent
-                                        .ephemeralAsWebAuthenticationSession);
+                                    externalUserAgent: ExternalUserAgent.ephemeralAsWebAuthenticationSession);
                               }
                             : null,
-                        child:
-                            const Text('End session using ephemeral session'),
+                        child: const Text('End session using ephemeral session'),
                       )),
                 if (Platform.isIOS)
                   Padding(
@@ -233,13 +212,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       child: ElevatedButton(
                         onPressed: _idToken != null
                             ? () async {
-                                await _endSession(
-                                    externalUserAgent: ExternalUserAgent
-                                        .sfSafariViewController);
+                                await _endSession(externalUserAgent: ExternalUserAgent.sfSafariViewController);
                               }
                             : null,
-                        child: const Text(
-                            'End session using SFSafariViewController'),
+                        child: const Text('End session using SFSafariViewController'),
                       )),
                 const SizedBox(height: 8),
                 if (_error != null) Text(_error ?? ''),
@@ -274,9 +250,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _endSession(
-      {ExternalUserAgent externalUserAgent =
-          ExternalUserAgent.asWebAuthenticationSession}) async {
+  Future<void> _endSession({ExternalUserAgent externalUserAgent = ExternalUserAgent.asWebAuthenticationSession}) async {
     try {
       _setBusyState();
       await _appAuth.endSession(EndSessionRequest(
@@ -312,9 +286,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _refresh() async {
     try {
       _setBusyState();
-      final TokenResponse result = await _appAuth.token(TokenRequest(
-          _clientId, _redirectUrl,
-          refreshToken: _refreshToken, issuer: _issuer, scopes: _scopes));
+      final TokenResponse result = await _appAuth
+          .token(TokenRequest(_clientId, _redirectUrl, refreshToken: _refreshToken, issuer: _issuer, scopes: _scopes));
       _processTokenResponse(result);
       await _testApi(result);
     } catch (e) {
@@ -327,8 +300,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _exchangeCode() async {
     try {
       _setBusyState();
-      final TokenResponse result = await _appAuth.token(TokenRequest(
-          _clientId, _redirectUrl,
+      final TokenResponse result = await _appAuth.token(TokenRequest(_clientId, _redirectUrl,
           authorizationCode: _authorizationCode,
           discoveryUrl: _discoveryUrl,
           codeVerifier: _codeVerifier,
@@ -346,9 +318,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _signInWithNoCodeExchange() async {
     try {
       _setBusyState();
-      /* 
+      /*
         The discovery endpoint (_discoveryUrl) is used to find the
-        configuration. The code challenge generation can be checked here 
+        configuration. The code challenge generation can be checked here
         > https://github.com/MaikuB/flutter_appauth/search?q=challenge.
         The code challenge is generated from the code verifier and only the
         code verifier is included in the result. This because to get the token
@@ -358,11 +330,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         https://www.rfc-editor.org/rfc/rfc7636 page 9 section 4.5.
       */
       final AuthorizationResponse result = await _appAuth.authorize(
-        AuthorizationRequest(_clientId, _redirectUrl,
-            discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'bob'),
+        AuthorizationRequest(_clientId, _redirectUrl, discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'bob'),
       );
 
-      /* 
+      /*
         or just use the issuer
         var result = await _appAuth.authorize(
           AuthorizationRequest(
@@ -386,15 +357,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       _setBusyState();
       final Random random = Random.secure();
-      final String nonce =
-          base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
+      final String nonce = base64Url.encode(List<int>.generate(16, (_) => random.nextInt(256)));
       // use the discovery endpoint to find the configuration
       final AuthorizationResponse result = await _appAuth.authorize(
         AuthorizationRequest(_clientId, _redirectUrl,
-            discoveryUrl: _discoveryUrl,
-            scopes: _scopes,
-            loginHint: 'bob',
-            nonce: nonce),
+            discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'bob', nonce: nonce),
       );
 
       _processAuthResponse(result);
@@ -413,8 +380,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _signInWithAutoCodeExchange(
-      {ExternalUserAgent externalUserAgent =
-          ExternalUserAgent.asWebAuthenticationSession}) async {
+      {ExternalUserAgent externalUserAgent = ExternalUserAgent.asWebAuthenticationSession}) async {
     try {
       _setBusyState(isAuthFlow: _isCustomBrowser(externalUserAgent));
 
@@ -422,19 +388,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         This shows that we can also explicitly specify the endpoints rather than
         getting from the details from the discovery document.
       */
-      final Future<AuthorizationTokenResponse> authRequest =
-          _appAuth.authorizeAndExchangeCode(
+      final Future<AuthorizationTokenResponse> authRequest = _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(_clientId, _redirectUrl,
-            serviceConfiguration: _serviceConfiguration,
-            scopes: _scopes,
-            externalUserAgent: externalUserAgent),
+            serviceConfiguration: _serviceConfiguration, scopes: _scopes, externalUserAgent: externalUserAgent),
       );
 
       // Apply timeout only when using an external browser user agent.
-      final AuthorizationTokenResponse result =
-          _isCustomBrowser(externalUserAgent)
-              ? await authRequest.timeout(const Duration(minutes: 2))
-              : await authRequest;
+      final AuthorizationTokenResponse result = _isCustomBrowser(externalUserAgent)
+          ? await authRequest.timeout(const Duration(minutes: 2))
+          : await authRequest;
 
       /*
         This code block demonstrates passing in values for the prompt
@@ -504,8 +466,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _accessToken = _accessTokenTextController.text = response.accessToken!;
       _idToken = _idTokenTextController.text = response.idToken!;
       _refreshToken = _refreshTokenTextController.text = response.refreshToken!;
-      _accessTokenExpirationTextController.text =
-          response.accessTokenExpirationDateTime!.toIso8601String();
+      _accessTokenExpirationTextController.text = response.accessTokenExpirationDateTime!.toIso8601String();
     });
   }
 
@@ -517,8 +478,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       */
       _codeVerifier = response.codeVerifier;
       _nonce = response.nonce;
-      _authorizationCode =
-          _authorizationCodeTextController.text = response.authorizationCode!;
+      _authorizationCode = _authorizationCodeTextController.text = response.authorizationCode!;
       _isBusy = false;
     });
   }
@@ -528,14 +488,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _accessToken = _accessTokenTextController.text = response.accessToken!;
       _idToken = _idTokenTextController.text = response.idToken!;
       _refreshToken = _refreshTokenTextController.text = response.refreshToken!;
-      _accessTokenExpirationTextController.text =
-          response.accessTokenExpirationDateTime!.toIso8601String();
+      _accessTokenExpirationTextController.text = response.accessTokenExpirationDateTime!.toIso8601String();
     });
   }
 
   Future<void> _testApi(TokenResponse? response) async {
-    final http.Response httpResponse = await http.get(
-        Uri.parse('https://demo.duendesoftware.com/api/test'),
+    final http.Response httpResponse = await http.get(Uri.parse('https://demo.duendesoftware.com/api/test'),
         headers: <String, String>{'Authorization': 'Bearer $_accessToken'});
     setState(() {
       _userInfo = httpResponse.statusCode == 200 ? httpResponse.body : '';
