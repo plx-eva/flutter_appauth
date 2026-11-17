@@ -103,8 +103,14 @@
                   forKey:@"error_debug_description"];
     }
 
-    NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
-    [details addEntriesFromDictionary:userInfo];
+    // userInfo may contain values FlutterStandardMessageCodec cannot encode
+    // (e.g. NSUnderlyingErrorKey -> NSError), which would trigger the codec's
+    // "Unsupported value" assertion and abort the app. Only pass through
+    // codec-safe values, converting the rest to their description.
+    [error.userInfo
+        enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+          details[[self codecSafeKey:key]] = [self codecSafeValue:value];
+        }];
 
     bool userDidCancel =
         [error.domain isEqual:@"org.openid.appauth.general"] &&
@@ -115,6 +121,43 @@
   result([FlutterError errorWithCode:errorCode
                              message:message
                              details:details]);
+}
+
++ (NSString *)codecSafeKey:(id)key {
+  return [key isKindOfClass:[NSString class]] ? key : [key description];
+}
+
+/// Returns a value FlutterStandardMessageCodec can encode: supported scalars
+/// are returned as is, collections are sanitized recursively and any other
+/// object (NSError, NSURL, NSDate, NSData...) is replaced by its description.
++ (id)codecSafeValue:(id)value {
+  if (value == nil) {
+    return [NSNull null];
+  }
+  if ([value isKindOfClass:[NSString class]] ||
+      [value isKindOfClass:[NSNumber class]] ||
+      [value isKindOfClass:[NSNull class]] ||
+      [value isKindOfClass:[FlutterStandardTypedData class]]) {
+    return value;
+  }
+  if ([value isKindOfClass:[NSArray class]]) {
+    NSMutableArray *array =
+        [NSMutableArray arrayWithCapacity:[(NSArray *)value count]];
+    for (id item in (NSArray *)value) {
+      [array addObject:[self codecSafeValue:item]];
+    }
+    return array;
+  }
+  if ([value isKindOfClass:[NSDictionary class]]) {
+    NSMutableDictionary *dictionary = [NSMutableDictionary
+        dictionaryWithCapacity:[(NSDictionary *)value count]];
+    [(NSDictionary *)value
+        enumerateKeysAndObjectsUsingBlock:^(id key, id item, BOOL *stop) {
+          dictionary[[self codecSafeKey:key]] = [self codecSafeValue:item];
+        }];
+    return dictionary;
+  }
+  return [value description] ?: [NSNull null];
 }
 
 + (NSString *)formatMessageWithError:(NSString *)messageFormat

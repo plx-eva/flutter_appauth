@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:http/http.dart' as http;
@@ -346,9 +346,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _signInWithNoCodeExchange() async {
     try {
       _setBusyState();
-      /* 
+      /*
         The discovery endpoint (_discoveryUrl) is used to find the
-        configuration. The code challenge generation can be checked here 
+        configuration. The code challenge generation can be checked here
         > https://github.com/MaikuB/flutter_appauth/search?q=challenge.
         The code challenge is generated from the code verifier and only the
         code verifier is included in the result. This because to get the token
@@ -362,7 +362,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'bob'),
       );
 
-      /* 
+      /*
         or just use the issuer
         var result = await _appAuth.authorize(
           AuthorizationRequest(
